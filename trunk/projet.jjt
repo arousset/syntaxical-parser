@@ -1,0 +1,122 @@
+options{multi=true;}
+
+PARSER_BEGIN(Projet)
+
+import java.io.*;
+
+public class Projet
+	public static void main(String[] args) throws Exception {
+		System.out.println(args[0]);
+		System.out.println("Debut parsing du code C");
+		Projet parser = new Projet(new FileReader(new File(args[0])));
+		parser.Axiome ();
+		
+		System.out.println("Parsing = OK.");
+		Node racine = parser.jjtree.rootNode();
+		((SimpleNode)racine).dump(">");
+	}
+}
+
+PARSER_END(Projet)
+
+
+/** Tokens skip **/
+SKIP : { 
+	" " | "\r" | "\t" | "\n"
+}
+
+
+/** Tokens reserved **/
+TOKEN : {
+ 	  < IF: "if" > 
+  	| < THEN: "then" >
+  	| < ELSE: "else">
+  	
+	| < PARAL: "(" > 
+  	| < PARAR: ")" >
+  	
+	| < ACCOL: "{" > 
+  	| < ACCOR: "}" >
+  	
+	| < EGALE: "=" > 
+  	| < PVIRG: ";" >
+	| < POINT: "." >
+	
+	| < FOR: "for" >
+	| < WHILE: "while" > 
+	
+	| < PLUS: "+" >
+	| < MINUS: "-" >
+	| < MULT: "*" >
+	| < DIV: "/" >
+}
+
+
+
+/** Tokens literaux */
+
+TOKEN : {
+	  < INTEGER: (["0"-"9"])+ >
+	| < IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")* >
+}
+
+
+/** Syntaxique rules **/
+void Axiome()#void : {} {
+	  Code()
+	//AffichageLexeme()
+}
+
+
+/** Shows Lexèmes **/
+void AffichageLexeme() : {} {
+	(
+		( < IF> {System.out.print("Token IF = ");}
+		| < THEN> {System.out.print("Token THEN = ");}
+		| < PARAL> {System.out.print("Token PARAL = ");}
+		| < PARAR> {System.out.print("Token PARAR = ");}
+		| < ACCOL> {System.out.print("Token ACCOL = ");}
+		| < ACCOR> {System.out.print("Token ACCOR = ");}
+		| < EGALE> {System.out.print("Token EGALE = ");}
+		| < PVIRG> {System.out.print("Token PVIRG = ");}
+		| < ELSE> {System.out.print("Token ELSE = ");}
+		| <FOR> {System.out.print("Token FOR = ");}
+		| <PLUS> {System.out.print("Token PLUS = ");}
+		| <MINUS> {System.out.print("Token MINUS = ");}
+		| <MULT> {System.out.print("Token MULT = ");}
+		| <DIV> {System.out.print("Token DIV = ");}
+		| <IDENT> {System.out.print("Token IDENT = ");}
+		| <INTEGER> {System.out.print("Token INTEGER = ");}
+		) {System.out.println(token.image);}
+	)+ 
+	<EOF>
+}
+
+
+/** Syntaxique code rules **/
+
+void Code() : {} {
+	Instructions()
+	<EOF> {System.out.println("Fin fichier.");}
+}
+
+
+void Instructions()#void : {} {
+	(  	  Condition() 
+		| Affectation()
+		| For()
+	)+	
+}
+
+void Condition() : {} {
+	<IF> <PARAL> Ident() <PARAR> <THEN> <ACCOL> Instructions() <ACCOR> [ <ELSE>  <ACCOL> Instructions() <ACCOR>]
+}
+
+void Affectation()#Affectation : {} {
+	Ident() <EGALE> ExpressionArithmetique() <PVIRG>
+}
+
+void For() : {} {
+	<FOR> <PARAL> Ident() <EGALE> ExpressionArithmetique() <PVIRG> Ident() <PVIRG> Ident() <PARAR> <ACCOL> Instructions() <ACCOR> 
+	
+}
