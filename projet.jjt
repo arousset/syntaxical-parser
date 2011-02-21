@@ -28,9 +28,17 @@ SKIP : {
 
 /** Tokens reserved **/
 TOKEN : {
- 	  < IF: "if" > 
+	 < MAIN : "main" >
+
+ 	| < IF: "if" > 
+	| < FOR : "for" >
   	| < THEN: "then" >
   	| < ELSE: "else">
+
+	| < INT : "int" >
+	| < CHAR : "char" >
+	| < FLOAT : "float" >
+	| < LONG : "long" >
   	
 	| < PARAL: "(" > 
   	| < PARAR: ")" >
@@ -41,9 +49,8 @@ TOKEN : {
 	| < EGALE: "=" > 
   	| < PVIRG: ";" >
 	| < POINT: "." >
+	| < NOT : "!" >
 	
-	| < FOR: "for" >
-	| < WHILE: "while" > 
 	
 	| < PLUS: "+" >
 	| < MINUS: "-" >
@@ -120,3 +127,36 @@ void For() : {} {
 	<FOR> <PARAL> Ident() <EGALE> ExpressionArithmetique() <PVIRG> Ident() <PVIRG> Ident() <PARAR> <ACCOL> Instructions() <ACCOR> 
 	
 }
+
+/** Expressions Arithmetiques */
+
+void ExpressionArithmetique() : {} {
+	ProduitArithmetique() (   ( <PLUS> ExpressionArithmetique())
+				| ( <MINUS> ExpressionArithmetique() ) )?
+
+}
+
+void ProduitArithmetique() : {} {
+	Element() (   ( <MULT> ProduitArithmetique() ) 
+		    | ( <DIV> ProduitArithmetique()  ))?
+}
+
+void Element() #void : {} {
+	 Entier() | <IDENT> 
+}
+
+void Entier() : {
+  int val1 = 1;
+  int val = 0;
+} {
+  (<MINUS> { })?
+  <INTEGER> {   }
+}
+
+/** Expressions Booleennes */
+
+void ExpressionBooleenne() : {} {
+	 Element() ( <EGAL><EGAL> (<TRUE>|<FALSE>) )? | <NOT>Element()
+}
+
+
