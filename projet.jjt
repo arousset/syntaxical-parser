@@ -4,7 +4,7 @@ PARSER_BEGIN(Projet)
 
 import java.io.*;
 
-public class Projet
+public class Projet {
 	public static void main(String[] args) throws Exception {
 		System.out.println(args[0]);
 		System.out.println("Debut parsing du code C");
@@ -46,10 +46,13 @@ TOKEN : {
 	| < ACCOL: "{" > 
   	| < ACCOR: "}" >
   	
-	| < EGALE: "=" > 
+	| < EGAL: "=" > 
   	| < PVIRG: ";" >
 	| < POINT: "." >
 	| < NOT : "!" >
+	
+	| < TRUE: "true" >
+	| < FALSE: "false" >
 	
 	
 	| < PLUS: "+" >
@@ -84,7 +87,7 @@ void AffichageLexeme() : {} {
 		| < PARAR> {System.out.print("Token PARAR = ");}
 		| < ACCOL> {System.out.print("Token ACCOL = ");}
 		| < ACCOR> {System.out.print("Token ACCOR = ");}
-		| < EGALE> {System.out.print("Token EGALE = ");}
+		| < EGAL> {System.out.print("Token EGAL = ");}
 		| < PVIRG> {System.out.print("Token PVIRG = ");}
 		| < ELSE> {System.out.print("Token ELSE = ");}
 		| <FOR> {System.out.print("Token FOR = ");}
@@ -94,6 +97,7 @@ void AffichageLexeme() : {} {
 		| <DIV> {System.out.print("Token DIV = ");}
 		| <IDENT> {System.out.print("Token IDENT = ");}
 		| <INTEGER> {System.out.print("Token INTEGER = ");}
+		| <MAIN> {System.out.println("Token MAIN = ");}
 		) {System.out.println(token.image);}
 	)+ 
 	<EOF>
@@ -109,10 +113,16 @@ void Code() : {} {
 
 
 void Instructions()#void : {} {
-	(  	  Condition() 
+	(  	 Main()
+		| Condition() 
 		| Affectation()
 		| For()
+		
 	)+	
+}
+
+void Main()#Main : {} {
+	<MAIN> <PARAL> <PARAR> <ACCOR> <ACCOL>	
 }
 
 void Condition() : {} {
@@ -120,13 +130,14 @@ void Condition() : {} {
 }
 
 void Affectation()#Affectation : {} {
-	Ident() <EGALE> ExpressionArithmetique() <PVIRG>
+	Ident() <EGAL> ExpressionArithmetique() <PVIRG>
 }
 
 void For() : {} {
-	<FOR> <PARAL> Ident() <EGALE> ExpressionArithmetique() <PVIRG> Ident() <PVIRG> Ident() <PARAR> <ACCOL> Instructions() <ACCOR> 
+	<FOR> <PARAL> Ident() <EGAL> ExpressionArithmetique() <PVIRG> Ident() <PVIRG> Ident() <PARAR> <ACCOL> Instructions() <ACCOR> 
 	
 }
+
 
 /** Expressions Arithmetiques */
 
@@ -160,3 +171,15 @@ void ExpressionBooleenne() : {} {
 }
 
 
+void Ident()  : {
+	String val = "";
+	} {
+	<IDENT> {
+	try {
+		val = token.image;
+	} catch (Exception e) {
+		System.err.println("Not a string : " + token.image);
+	}
+	//jjtThis.setValeur(val);
+	}
+}
