@@ -1,1 +1,50 @@
-.
+/* Fichier a inclure */
+#include <stdio.h>
+#include <math.h>
+
+
+int unefonction (int nombre,float tilou, char lechar) {
+	if(b >= 256) {
+		if(c== 1) {
+			
+		}else{
+			/* premier com */
+		}
+	}else{
+		/* deuxieme com */
+	}
+}
+
+
+int main() {
+	int i=120;
+	
+	/* com */
+	cbd = 2;
+	
+	for(int i=0;i<=2;i++) {
+		/* Le For */
+		if( biyou != 50) {
+				lavariable = 2;
+		}
+	}
+
+	do {
+		cbd = 2;
+		
+		if( biyou != 50) {
+				lavariable = 2;
+		}
+	} while (i != 5)
+	
+	switch (lavar) {
+			case c: 
+				variable = 2;
+			break;
+		
+			case a: 
+				variable = 5;
+			break;
+	}
+	
+}

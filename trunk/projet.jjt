@@ -1,5 +1,18 @@
 options{multi=true;}
-/** Je test la modif **/
+
+/* Il reste a faire : 
+ * Ajouter les structures et les enum 
+ * Ajouter les appel de fonction
+ * Gérer les return pour les fonctions 
+ * Ajotuer pointeur et tableau
+ * Revoir les commentaire avec Token Speciaux
+ * Et la la partie 1 sera terminé !!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * 
+ * Après il faudra gérer au mieux l'arbre avec les AST pour pouvoir regourper les node et que l'affichage de larbre soit propre 
+ * 
+ * Bon le deux gérer les erreurs j'ai déja changer les retour valeur pour les afficher dans l'arbre */
+
+
 PARSER_BEGIN(Projet)
 
 import java.io.*;
@@ -28,17 +41,24 @@ SKIP : {
 
 /** Tokens reserved **/
 TOKEN : {
-	 < MAIN : "main" >
+	
 
- 	| < IF: "if" > 
+ 	  < IF: "if" > 
 	| < FOR : "for" >
   	| < THEN: "then" >
   	| < ELSE: "else">
+  	| < DO: "do" >
+  	| < WHILE: "while" >
+  	| < BREAK: "break" >
+  	| < SWITCH: "switch" >
+  	| < CASE: "case" >
+  	| < RETURN: "return" >
 
-	| < INT : "int" >
-	| < CHAR : "char" >
-	| < FLOAT : "float" >
-	| < LONG : "long" >
+
+	| < INT: "int" >
+	| < CHAR: "char" >
+	| < FLOAT: "float" >
+  	
   	
 	| < PARAL: "(" > 
   	| < PARAR: ")" >
@@ -46,19 +66,38 @@ TOKEN : {
 	| < ACCOL: "{" > 
   	| < ACCOR: "}" >
   	
+  	| < BL: "<" >
+	| < BR: ">" >
+  	
 	| < EGAL: "=" > 
   	| < PVIRG: ";" >
 	| < POINT: "." >
 	| < NOT : "!" >
+	| < VIRG: "," >
+	| < DPOINT: ":" >
 	
 	| < TRUE: "true" >
 	| < FALSE: "false" >
 	
+	| < INCR: "++" >
+	| < DECR: "--" >
 	
 	| < PLUS: "+" >
 	| < MINUS: "-" >
 	| < MULT: "*" >
 	| < DIV: "/" >
+	| < MOD: "%" >
+	
+	| <AND: "&" >
+	| <OR: "|" >
+
+	| < SHARP: "#" >	
+	| < INCLUDE: "include" >
+	| < EXTENSI: ".h" >
+	
+	| < STRUCT: "struct" >
+	| < ENUM: "enum" >
+	 
 }
 
 
@@ -97,7 +136,6 @@ void AffichageLexeme() : {} {
 		| <DIV> {System.out.print("Token DIV = ");}
 		| <IDENT> {System.out.print("Token IDENT = ");}
 		| <INTEGER> {System.out.print("Token INTEGER = ");}
-		| <MAIN> {System.out.println("Token MAIN = ");}
 		) {System.out.println(token.image);}
 	)+ 
 	<EOF>
@@ -113,29 +151,113 @@ void Code() : {} {
 
 
 void Instructions()#void : {} {
-	(  	 Main()
-		| Condition() 
-		| Affectation()
-		| For()
-		
+	(  	 
+		  Comment()
+		| Include()
+		| Function()
 	)+	
 }
 
-void Main()#Main : {} {
-	<MAIN> <PARAL> <PARAR> <ACCOR> <ACCOL>	
+void Operator() : {} {
+	<PLUS> | <MINUS> | <DIV> | <MULT>
+}
+
+void LogicalOperator() : {} {
+	<AND> | <OR> // Voir pour ajouter && || avec le LOOKAHEAD pour retirer les récusrivitées a gauche
+}
+
+
+void Include()#Include : {} {
+		<SHARP><INCLUDE> <BL> Ident() (<EXTENSI>)? <BR>
+}	
+
+
+void Comment()#Commentaire : {} {
+		<DIV><MULT> (LOOKAHEAD(Ident()) Ident())+ <MULT><DIV>
+}
+
+void Type()#Type : {String val = "";} { 
+		(<INT> | <CHAR> | <FLOAT>) {
+									try {
+										val = token.image;
+									} catch (Exception e) {
+										System.err.println("Not a type : " + token.image);
+									}
+										jjtThis.setValeur(val);
+									}
+}
+
+void Body()#void : {} { // Revoir car warning LOOKAHEAD
+  	(  
+	  Comment()
+	| Affectation()
+	| Boucles()
+	| Condition()
+  )*
+}
+
+// On gère le main dansl es fonction ! il faut jsute faire un test pour savoir s'il y a un return dedans pour les fonctions <INT>
+void Function()#Function : {} {
+	Type() Ident() <PARAL> Parameters() <PARAR> <ACCOL> Body() <ACCOR>
+}
+
+
+
+
+void Parameters() : {} { // Erreur pour plusieurs paramètres
+				(LOOKAHEAD(3)	  (Type() Ident() <VIRG>)
+							    | (Type() Ident() ))*	
+}
+
+void ConditionSigne() : {} { // Permet de lever l'indécision a revoir pour pouvoir en mettre plus
+		LOOKAHEAD(4)  <BL><EGAL>   // <= 
+					| <BR><EGAL>   // >=
+					| <EGAL><EGAL> // ==
+					| <NOT><EGAL>  // !=
+					/*| <BL>
+					| <BR>*/
+}
+
+
+void CorpsCondition()#corpCC(2) : {} { // a revoir pour ajouter LogicalOperator()
+	Ident() ConditionSigne() (Ident() | (<INTEGER>)*) 	
 }
 
 void Condition() : {} {
-	<IF> <PARAL> Ident() <PARAR> <THEN> <ACCOL> Instructions() <ACCOR> [ <ELSE>  <ACCOL> Instructions() <ACCOR>]
+	<IF> <PARAL> CorpsCondition() <PARAR> <ACCOL> Body() <ACCOR> [ <ELSE>  <ACCOL> Body() <ACCOR>]
 }
 
 void Affectation()#Affectation : {} {
-	Ident() <EGAL> ExpressionArithmetique() <PVIRG>
+	((Type() Ident()) | Ident()) <EGAL> (<INTEGER>)+ <PVIRG>
 }
 
+void Boucles() : {} {
+	      For() 
+		| While()
+		| DoWhile()
+		| Switch()
+}
+
+
+void DIncrementation() : {} {
+	Ident() (<INCR> | <DECR>)
+}
+
+
 void For() : {} {
-	<FOR> <PARAL> Ident() <EGAL> ExpressionArithmetique() <PVIRG> Ident() <PVIRG> Ident() <PARAR> <ACCOL> Instructions() <ACCOR> 
-	
+	<FOR> <PARAL> Affectation() Ident() ConditionSigne() (Ident() | (<INTEGER>)+) <PVIRG> DIncrementation() <PARAR> <ACCOL> Body() <ACCOR> 	
+}
+
+void While() : {} { // Probleme avec le while je comprend pas trop pk 
+	<WHILE> <PARAL> CorpsCondition() <PARAR> <ACCOL> Body() Ident() (<INCR> | <DECR>) <ACCOR>
+}
+
+void DoWhile() : {} {
+	<DO> <ACCOL> Body() <ACCOR> <WHILE> <PARAL> CorpsCondition() <PARAR>
+}
+
+void Switch() : {} { // Ajouter la section default 
+	<SWITCH> <PARAL> Ident() <PARAR> <ACCOL> (<CASE> Ident() <DPOINT> Body() <BREAK> <PVIRG>)+ <ACCOR>
 }
 
 
@@ -144,7 +266,6 @@ void For() : {} {
 void ExpressionArithmetique() : {} {
 	ProduitArithmetique() (   ( <PLUS> ExpressionArithmetique())
 				| ( <MINUS> ExpressionArithmetique() ) )?
-
 }
 
 void ProduitArithmetique() : {} {
@@ -165,21 +286,30 @@ void Entier() : {
 }
 
 /** Expressions Booleennes */
-
 void ExpressionBooleenne() : {} {
 	 Element() ( <EGAL><EGAL> (<TRUE>|<FALSE>) )? | <NOT>Element()
 }
 
 
-void Ident()  : {
-	String val = "";
-	} {
+void Ident() : {String val = "";} {
 	<IDENT> {
 	try {
 		val = token.image;
 	} catch (Exception e) {
 		System.err.println("Not a string : " + token.image);
 	}
-	//jjtThis.setValeur(val);
+		jjtThis.setValeur(val);
 	}
 }
+
+/*
+void Integer() : {Int val = 0;} {
+	<INTEGER> {
+	try {
+		val = token.image;
+	} catch (Exception e) {
+		System.err.println("Not a number : " + token.image);
+	}
+		jjtThis.setValeur(val);
+	}
+}*/

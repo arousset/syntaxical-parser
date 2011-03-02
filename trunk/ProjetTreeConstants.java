@@ -4,25 +4,51 @@ public interface ProjetTreeConstants
   public int JJTVOID = 0;
   public int JJTAFFICHAGELEXEME = 1;
   public int JJTCODE = 2;
-  public int JJTMAIN = 3;
-  public int JJTCONDITION = 4;
-  public int JJTAFFECTATION = 5;
-  public int JJTFOR = 6;
-  public int JJTEXPRESSIONARITHMETIQUE = 7;
-  public int JJTPRODUITARITHMETIQUE = 8;
-  public int JJTENTIER = 9;
-  public int JJTEXPRESSIONBOOLEENNE = 10;
-  public int JJTIDENT = 11;
+  public int JJTOPERATOR = 3;
+  public int JJTLOGICALOPERATOR = 4;
+  public int JJTINCLUDE = 5;
+  public int JJTCOMMENTAIRE = 6;
+  public int JJTTYPE = 7;
+  public int JJTFUNCTION = 8;
+  public int JJTPARAMETERS = 9;
+  public int JJTCONDITIONSIGNE = 10;
+  public int JJTCORPCC = 11;
+  public int JJTCONDITION = 12;
+  public int JJTAFFECTATION = 13;
+  public int JJTBOUCLES = 14;
+  public int JJTDINCREMENTATION = 15;
+  public int JJTFOR = 16;
+  public int JJTWHILE = 17;
+  public int JJTDOWHILE = 18;
+  public int JJTSWITCH = 19;
+  public int JJTEXPRESSIONARITHMETIQUE = 20;
+  public int JJTPRODUITARITHMETIQUE = 21;
+  public int JJTENTIER = 22;
+  public int JJTEXPRESSIONBOOLEENNE = 23;
+  public int JJTIDENT = 24;
 
 
   public String[] jjtNodeName = {
     "void",
     "AffichageLexeme",
     "Code",
-    "Main",
+    "Operator",
+    "LogicalOperator",
+    "Include",
+    "Commentaire",
+    "Type",
+    "Function",
+    "Parameters",
+    "ConditionSigne",
+    "corpCC",
     "Condition",
     "Affectation",
+    "Boucles",
+    "DIncrementation",
     "For",
+    "While",
+    "DoWhile",
+    "Switch",
     "ExpressionArithmetique",
     "ProduitArithmetique",
     "Entier",
@@ -30,4 +56,4 @@ public interface ProjetTreeConstants
     "Ident",
   };
 }
-/* JavaCC - OriginalChecksum=a78eecf5d8f64d3c94d8fc82aad3d6cf (do not edit this line) */
+/* JavaCC - OriginalChecksum=e620735ba6c5150129e97a8a4a8dff11 (do not edit this line) */
